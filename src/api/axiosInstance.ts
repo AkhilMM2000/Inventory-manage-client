@@ -29,9 +29,12 @@ axiosPrivate.interceptors.response.use(
 
       try {
         // 🔄 Call refresh endpoint
-        const res = await axios.post<{accessToken:string}>(`${import.meta.env.VITE_API_URL}/auth/refresh`, {
-          withCredentials: true,
-        });
+        const res = await axios.post<{ accessToken: string }>(
+  `${import.meta.env.VITE_API_URL}/auth/refresh-token`,
+  {},
+  { withCredentials: true }
+);
+
 
         const newAccessToken = res.data.accessToken;
 

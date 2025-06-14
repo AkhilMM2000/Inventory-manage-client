@@ -1,5 +1,6 @@
 import axios from "axios";
-
+import axiosPrivate from "./axiosInstance";
+import type { TokenPayload } from "../types/user"; 
 interface RegisterPayload {
   fullName: string;
   email: string;
@@ -25,4 +26,10 @@ export const loginUser = async (payload: LoginPayload) => {
     withCredentials: true,
   });
   return response.data;
+};
+
+
+export const getCurrentUser = async () => {
+  const response = await axiosPrivate.get("/auth/me");
+  return response.data.user as TokenPayload;
 };

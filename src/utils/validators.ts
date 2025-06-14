@@ -21,3 +21,18 @@ export const validatePassword = (password: string): string | null => {
   }
   return null;
 };
+export const validateDescription = (desc: string): string | null => {
+  if (!desc.trim()) return "Description is required.";
+  if (desc.length < 5) return "Description must be at least 5 characters.";
+  return null;
+};
+
+export const validateQuantity = (qty: number): string | null => {
+  if (qty === undefined || qty < 0) return "Quantity must be 0 or more.";
+  return null;
+};
+
+export const validatePrice = (price: number): string | null => {
+  if (price === undefined || price < 40) return "Price must be 40 or more.";
+  return null;
+};
