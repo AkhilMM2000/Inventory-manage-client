@@ -36,3 +36,13 @@ export const validatePrice = (price: number): string | null => {
   if (price === undefined || price < 40) return "Price must be 40 or more.";
   return null;
 };
+export const validateAddress = (address: string) => {
+  if (!address.trim()) return "Address is required.";
+  return null;
+};
+
+export const validateMobile = (mobile: string) => {
+  const pattern = /^[0-9]{10}$/;
+  if (!pattern.test(mobile)) return "Mobile must be 10 digits.";
+  return null;
+};

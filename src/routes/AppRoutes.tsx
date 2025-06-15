@@ -7,6 +7,7 @@ import AddItem from "../pages/items/addItems";
 
 import MainLayout from "../layout/MainLayout";
 import ItemList from "../pages/items/ItemList";
+import CustomerList from "../pages/customers/CustomerList";
 
 const AppRoutes = () => {
   return (
@@ -22,7 +23,7 @@ const AppRoutes = () => {
         <Route path="/items/add" element={<AddItem />} />
       
   <Route path="/items" element={<ItemList />} />
-       
+       <Route path="/customers" element={<CustomerList/>}/>
       </Route>
 
      

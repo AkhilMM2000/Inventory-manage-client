@@ -22,7 +22,7 @@ export const registerUser = async (payload: RegisterPayload) => {
 
 
 export const loginUser = async (payload: LoginPayload) => {
-  const response = await axios.post(  `${import.meta.env.VITE_API_URL}/auth/login`, payload, {
+  const response = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, payload, {
     withCredentials: true,
   });
   return response.data;

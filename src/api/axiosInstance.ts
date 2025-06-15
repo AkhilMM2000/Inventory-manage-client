@@ -10,6 +10,7 @@ const axiosPrivate = axios.create({
 axiosPrivate.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem("accessToken");
+   
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -38,7 +39,7 @@ axiosPrivate.interceptors.response.use(
 
         const newAccessToken = res.data.accessToken;
 
-        // ♻️ Update token and retry request
+       
         localStorage.setItem("accessToken", newAccessToken);
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
