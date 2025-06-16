@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useAuthUser } from "../hooks/authUser";
+import { logout } from "../api/auth";
 
 const MainLayout = () => {
   const { user, loading } = useAuthUser();
@@ -8,6 +9,21 @@ const MainLayout = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+const handleLogout = async () => {
+  try {
+    await logout();
+    localStorage.removeItem("accessToken");
+    navigate("/login", { replace: true });
+  } catch {
+    // Fallback in case logout fails
+    localStorage.removeItem("accessToken");
+    navigate("/login", { replace: true });
+  }
+};
+const handleLogoutClick = () => {
+  handleLogout();
+  setDropdownOpen(false);
+};
   // Detect click outside dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -63,10 +79,7 @@ const MainLayout = () => {
         <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow z-10">
           <button
             className="w-full text-left px-4 py-2 hover:bg-gray-100"
-            onClick={() => {
-              console.log("Logout clicked");
-              setDropdownOpen(false);
-            }}
+             onClick={handleLogoutClick}
           >
             🚪 Logout
           </button>

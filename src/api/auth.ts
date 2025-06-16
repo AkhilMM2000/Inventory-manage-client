@@ -33,3 +33,8 @@ export const getCurrentUser = async () => {
   const response = await axiosPrivate.get("/auth/me");
   return response.data.user as TokenPayload;
 };
+
+
+export const logout = async (): Promise<void> => {
+  await axiosPrivate.post("/auth/logout");
+};
