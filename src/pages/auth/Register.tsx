@@ -49,47 +49,59 @@ if (nameError || emailError || passwordError) {
   }
   };
   return (
-     <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
+     <div
+  className="flex justify-center items-center min-h-screen bg-cover bg-center px-4"
+  style={{
+    backgroundImage:
+      "url('https://plus.unsplash.com/premium_photo-1686878940830-9031355ec98c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
+  }}
+>
+  <form onSubmit={handleSubmit} className="bg-white bg-opacity-90 p-8 rounded-lg shadow-md w-full max-w-md">
+    <h2 className="text-2xl font-bold mb-6 text-center text-blue-700">🧾 Register Your Account</h2>
 
-       
-          
-         <InputField
-  label="Full Name"
-  name="fullName"
-  value={form.fullName}
-  placeholder="enter name"
-  onChange={handleChange}
-/>
+    <InputField
+      label="Full Name"
+      name="fullName"
+      value={form.fullName}
+      placeholder="Enter name"
+      onChange={handleChange}
+    />
 
-<InputField
-  label="Email"
-  name="email"
-  type="email"
-  value={form.email}
-  placeholder="enter email"
-  onChange={handleChange}
-/>
+    <InputField
+      label="Email"
+      name="email"
+      type="email"
+      value={form.email}
+      placeholder="Enter email"
+      onChange={handleChange}
+    />
 
-<InputField
-  label="Password"
-  name="password"
-  type="password"
-  value={form.password}
-  placeholder="••••••••"
-  onChange={handleChange}
-/>
+    <InputField
+      label="Password"
+      name="password"
+      type="password"
+      value={form.password}
+      placeholder="••••••••"
+      onChange={handleChange}
+    />
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
-        >
-            {loading ? "Registering..." : "Register"}
-        </button>
-      </form>
-    </div>
+    <button
+      type="submit"
+      disabled={loading}
+      className="w-full mt-4 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+    >
+      {loading ? "Registering..." : "Register"}
+    </button>
+
+    <p className="mt-4 text-center text-sm text-gray-700">
+      Already registered?{" "}
+      <a href="/login" className="text-blue-600 hover:underline font-medium">
+        Login here
+      </a>
+    </p>
+  </form>
+</div>
+
   );
 };
 

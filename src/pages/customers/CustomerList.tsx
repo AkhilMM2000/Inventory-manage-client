@@ -8,6 +8,8 @@ import DeleteModal from "../../components/ui/DeleteModal";
 import toast from "react-hot-toast";
 import axios from "axios";
 import CustomerModal from "../../components/modals/CustomerModal";
+import { Link } from "react-router-dom";
+import { BookOpen, Pencil, Trash2 } from "lucide-react";
 
 const CustomerList = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -106,13 +108,31 @@ const handleCustomerSubmit = async (form: CustomerFormData) => {
           c.address,
           c.mobile,
         ])}
-        renderActions={(_, index) => (
-          <div className="flex gap-2">
-            <button onClick={() => handleEditClick(index)} className="text-blue-600 hover:underline">Edit</button>
-            <button onClick={() => handleDeleteClick(index)} className="text-red-600 hover:underline">Delete</button>
-            
-          </div>
-        )}
+   renderActions={(_, index) => {
+  const customer = customers[index];
+  return (
+    <div className="flex items-center gap-2 text-gray-600 text-sm">
+      <button
+        onClick={() => handleEditClick(index)}
+        className="hover:text-blue-600"
+        title="Edit"
+      >
+        <Pencil size={16} />
+      </button>
+      <button
+        onClick={() => handleDeleteClick(index)}
+        className="hover:text-red-600"
+        title="Delete"
+      >
+        <Trash2 size={16} />
+      </button>
+      <Link to={`/customers/${customer.id}/ledger`} title="View Ledger">
+        <BookOpen size={16} className="hover:text-blue-600" />
+      </Link>
+    </div>
+  );
+}}
+
       />
 
       <Pagination

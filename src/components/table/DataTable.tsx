@@ -7,19 +7,22 @@ interface DataTableProps {
 }
 
 const DataTable: React.FC<DataTableProps> = ({ columns, rows, renderActions }) => {
-  const totalCols = renderActions ? columns.length + 1 : columns.length;
+ 
 
   return (
     <div className="w-full bg-white shadow rounded-md overflow-x-auto">
       {/* Header */}
-      <div className="grid grid-cols-12 bg-gray-100 font-semibold p-3 border-b">
+      <div className="flex w-full bg-gray-100 font-semibold text-sm border-b">
         {columns.map((col, index) => (
-          <div key={index} className={`col-span-${12 / totalCols} truncate`}>
+          <div
+            key={index}
+            className="flex-1 px-4 py-3 min-w-[120px] truncate"
+          >
             {col}
           </div>
         ))}
         {renderActions && (
-          <div className={`col-span-${12 / totalCols} truncate`}>Actions</div>
+          <div className="w-[120px] px-4 py-3 truncate">Action</div>
         )}
       </div>
 
@@ -27,16 +30,19 @@ const DataTable: React.FC<DataTableProps> = ({ columns, rows, renderActions }) =
       {rows.length === 0 ? (
         <div className="p-4 text-center text-gray-500">No data available</div>
       ) : (
-        rows.map((row, i) => (
-          <div key={i} className="grid grid-cols-12 p-3 border-b hover:bg-gray-50 text-sm">
-            {row.map((cell, j) => (
-              <div key={j} className={`col-span-${12 / totalCols} truncate`}>
+        rows.map((row, rowIndex) => (
+          <div key={rowIndex} className="flex w-full text-sm border-b hover:bg-gray-50">
+            {row.map((cell, cellIndex) => (
+              <div
+                key={cellIndex}
+                className="flex-1 px-4 py-3 min-w-[120px] truncate"
+              >
                 {cell}
               </div>
             ))}
             {renderActions && (
-              <div className={`col-span-${12 / totalCols} flex justify-start`}>
-                {renderActions(row, i)}
+              <div className="w-[120px] px-4 py-3">
+                {renderActions(row, rowIndex)}
               </div>
             )}
           </div>
@@ -45,5 +51,6 @@ const DataTable: React.FC<DataTableProps> = ({ columns, rows, renderActions }) =
     </div>
   );
 };
+
 
 export default DataTable;
