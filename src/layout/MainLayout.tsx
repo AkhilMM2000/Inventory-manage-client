@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useAuthUser } from "../hooks/authUser";
 import { logout } from "../api/auth";
