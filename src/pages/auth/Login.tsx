@@ -59,7 +59,7 @@ if (emailError || passwordError) {
       type="email"
       value={form.email}
       onChange={handleChange}
-      placeholder="john@example.com"
+      placeholder="enter the email"
     />
 
     <InputField

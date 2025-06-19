@@ -10,6 +10,7 @@ import SaleDetailsModal from "../../components/modals/SaleDetailsModal";
 import DataTable from "../../components/table/DataTable";
 import { generateSalesReportPDF } from "../../utils/pdfUtils";
 import { useNavigate } from "react-router-dom";
+import moment from "moment";
 
 const SalesList: React.FC = () => {
   const [sales, setSales] = useState<Sale[]>([]);
@@ -102,7 +103,7 @@ const navigate=useNavigate()
         columns={["#", "Date", "Customer", "Items","total","Payment"]}
         rows={sales.map((c, i) => [
           (page - 1) * limit + i + 1,
-          c.createdAt,
+         moment(c.createdAt).format("dddd, MMMM YYYY"),
           c.customerName,
           c.items.length,
           c.totalAmount,
