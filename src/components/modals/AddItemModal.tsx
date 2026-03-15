@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { addItem } from "../../api/items";
+import { addItem } from "../../api/item"; 
 import InputField from "../../components/forms/InputField";
 import toast from "react-hot-toast";
 import axios from "axios";
 import {
   validateDescription,
+  validateName,
   validatePrice,
   validateQuantity,
 } from "../../utils/validators";
@@ -36,9 +37,9 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSuccess 
     const descError = validateDescription(form.description);
     const qtyError = validateQuantity(form.quantity);
     const priceError = validatePrice(form.price);
-
-    if (descError || qtyError || priceError) {
-      toast.error(descError || qtyError || priceError);
+const nameError=validateName(form.name)
+    if (nameError||descError || qtyError || priceError) {
+      toast.error(nameError||descError || qtyError || priceError);
       return;
     }
 

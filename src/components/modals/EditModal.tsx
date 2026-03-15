@@ -74,13 +74,13 @@ if (nameError || descError || qtyError || priceError) {
         <h3 className="text-lg font-semibold mb-4">Edit Item</h3>
 
         <div className="space-y-3">
-          <input
-            type="text"
+            <InputField
+           label="name"
             name="name"
             placeholder="Name"
             value={form.name}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            
           />
            <InputField
           label="Description"
@@ -88,22 +88,22 @@ if (nameError || descError || qtyError || priceError) {
           value={form.description}
           onChange={handleChange}
         />
-          <input
-            type="number"
-            name="quantity"
-            placeholder="Quantity"
-            value={form.quantity}
-            onChange={handleChange}
-            className="w-full border p-2 rounded"
-          />
-          <input
-            type="number"
-            name="price"
-            placeholder="Price"
-            value={form.price}
-            onChange={handleChange}
-            className="w-full border p-2 rounded"
-          />
+           <InputField
+    label="Quantity"
+    name="quantity"
+    type="number"
+    placeholder="Quantity"
+    value={form.quantity.toString()}  // Convert to string for the input
+    onChange={handleChange}
+  />
+  <InputField
+    label="Price"
+    name="price"
+    type="number"
+    placeholder="Price"
+    value={form.price.toString()}  // Convert to string for the input
+    onChange={handleChange}
+  />
         </div>
 
         <div className="flex justify-end gap-3 mt-6">

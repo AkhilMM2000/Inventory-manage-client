@@ -10,7 +10,8 @@ import SaleDetailsModal from "../../components/modals/SaleDetailsModal";
 import DataTable from "../../components/table/DataTable";
 import { generateSalesReportPDF } from "../../utils/pdfUtils";
 import { useNavigate } from "react-router-dom";
-import moment from "moment";
+import { generateSalesReportExcel } from "../../utils/excelUtils";
+
 
 const SalesList: React.FC = () => {
   const [sales, setSales] = useState<Sale[]>([]);
@@ -20,6 +21,10 @@ const SalesList: React.FC = () => {
   const [search, setSearch] = useState("");
   const [paymentType, setPaymentType] = useState<"Cash" | "Credit" | "">("");
   const [selectedSale, setSelectedSale] = useState<Sale | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+ 
+  const [isDownloadingExcel, setIsDownloadingExcel] = useState(false);  // Add this for Excel loading state
+
 const navigate=useNavigate()
   const fetchSales = async () => {
     try {
@@ -34,6 +39,64 @@ const navigate=useNavigate()
     }
 
     toast.error(`❌ ${msg}`);
+    }
+  };
+
+  const fetchAllSalesForReport = async () => {
+    const DOWNLOAD_PAGE_SIZE = 1000;
+    const firstPage = await getSales(
+      1,
+      DOWNLOAD_PAGE_SIZE,
+      search,
+      paymentType || undefined
+    );
+
+    const totalPages = Math.ceil(firstPage.total / DOWNLOAD_PAGE_SIZE);
+    if (totalPages <= 1) return firstPage.data;
+
+    const pagePromises: Promise<typeof firstPage>[] = [];
+    for (let p = 2; p <= totalPages; p += 1) {
+      pagePromises.push(
+        getSales(p, DOWNLOAD_PAGE_SIZE, search, paymentType || undefined)
+      );
+    }
+
+    const restPages = await Promise.all(pagePromises);
+    return [firstPage.data, ...restPages.map((r) => r.data)].flat();
+  };
+
+  const handleDownloadPdf = async () => {
+    try {
+      setIsDownloading(true);
+      const allSales = await fetchAllSalesForReport();
+      generateSalesReportPDF(allSales);
+    } catch (error: unknown) {
+      let msg = "Failed to download report";
+
+      if (axios.isAxiosError(error) && error.response) {
+        msg = error.response.data?.error || msg;
+      }
+
+      toast.error(`âŒ ${msg}`);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+   const handleDownloadExcel = async () => {
+    try {
+      setIsDownloadingExcel(true);
+      const allSales = await fetchAllSalesForReport();
+      generateSalesReportExcel(allSales);
+    } catch (error: unknown) {
+      let msg = "Failed to download Excel report";
+
+      if (axios.isAxiosError(error) && error.response) {
+        msg = error.response.data?.error || msg;
+      }
+
+      toast.error(`❌ ${msg}`);
+    } finally {
+      setIsDownloadingExcel(false);
     }
   };
 
@@ -75,10 +138,11 @@ const navigate=useNavigate()
 
       {/* 📥 Download PDF */}
       <button
-        onClick={() => generateSalesReportPDF(sales)}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
+        onClick={handleDownloadPdf}
+        disabled={isDownloading}
+        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm disabled:opacity-60"
       >
-        ⬇️ Download PDF
+        {isDownloading ? "Generating..." : "⬇️ Download PDF"}
       </button>
 
       {/* ➕ Add Sale */}
@@ -88,6 +152,13 @@ const navigate=useNavigate()
       >
         ➕ Add Sale
       </button>
+      <button
+            onClick={handleDownloadExcel}
+            disabled={isDownloadingExcel}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm disabled:opacity-60"
+          >
+            {isDownloadingExcel ? "Generating..." : "📊 Download Excel"}
+          </button>
     </div>
   </div>
 
@@ -103,7 +174,7 @@ const navigate=useNavigate()
         columns={["#", "Date", "Customer", "Items","total","Payment"]}
         rows={sales.map((c, i) => [
           (page - 1) * limit + i + 1,
-         moment(c.createdAt).format("dddd, MMMM YYYY"),
+         c.createdAt.split("T")[0],
           c.customerName,
           c.items.length,
           c.totalAmount,

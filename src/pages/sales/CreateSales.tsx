@@ -7,6 +7,7 @@ import type { Item } from "../../types/Item";
 import type { SaleItem } from "../../types/Sales"; 
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import DataTable from "../../components/table/DataTable";
 
 const CreateSale: React.FC = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -16,7 +17,7 @@ const CreateSale: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<SaleItem[]>([]);
   const [itemId, setItemId] = useState("");
   const [quantity, setQuantity] = useState(1);
-
+console.log(selectedItems)
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,15 +37,35 @@ const CreateSale: React.FC = () => {
   }, []);
 
   const handleAddItem = () => {
-    const existing = selectedItems.find((i) => i.itemId === itemId);
-    const item = items.find((i) => i.id === itemId);
-    if (!item || existing) return;
+  const selected = selectedItems.find((i) => i.itemId === itemId);
+  const item = items.find((i) => i.id === itemId);
 
-    if (quantity > item.quantity) {
-      toast.error(`Only ${item.quantity} units available`);
-      return;
-    }
+  if (!item) {
+    toast.error("Please select an  item");
+    return;
+  }
 
+ if(item.quantity==0){
+  toast.error(`stocks become empty now`);
+    return;
+ }
+
+  if ( item.quantity<quantity) {
+    toast.error(`Only ${item.quantity} units available`);
+    return;
+  }
+
+  if (selected) {
+    // Update existing item
+    setSelectedItems((prev) =>
+      prev.map((i) =>
+        i.itemId === itemId
+          ? { ...i, quantity: i.quantity + quantity }
+          : i
+      )
+    );
+  } else {
+    // Add new item
     setSelectedItems((prev) => [
       ...prev,
       {
@@ -54,9 +75,20 @@ const CreateSale: React.FC = () => {
         unitPrice: item.price,
       },
     ]);
+  }
 
-    setItemId("");
-    setQuantity(1);
+  // ✅ Update inventory once
+  setItems((prev) =>
+    prev.map((i) =>
+      i.id === itemId
+        ? { ...i, quantity: i.quantity - quantity }
+        : i
+    )
+  );
+
+  // Reset
+  setQuantity(1);
+ 
   };
 
   const handleSubmit = async () => {
@@ -89,6 +121,15 @@ const CreateSale: React.FC = () => {
       toast.error("Sale failed");
     }
   };
+  const handleRemove = (id:string) => {
+   const item= selectedItems.find((i) => i.itemId === id);
+   setItems((prev) =>
+     prev.map((i) =>
+       i.id === id ? { ...i, quantity: i.quantity + (item?.quantity || 0) } : i 
+      ));
+
+      setSelectedItems((prev) => prev.filter((item) => item.itemId!== id));
+  };
 
   return (
     <div className="bg-white p-6 rounded shadow max-w-3xl mx-auto">
@@ -102,7 +143,7 @@ const CreateSale: React.FC = () => {
             onChange={(e) => setSelectedCustomerId(e.target.value)}
             className="w-full border p-2 rounded"
           >
-            <option value="cash">Cash</option>
+            
             {customers.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -160,26 +201,52 @@ const CreateSale: React.FC = () => {
         ➕ Add Item
       </button>
 
-      <table className="w-full text-sm border mb-4">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="p-2">Item</th>
-            <th className="p-2">Qty</th>
-            <th className="p-2">Price</th>
-            <th className="p-2">Subtotal</th>
-          </tr>
-        </thead>
-        <tbody>
-          {selectedItems.map((item, i) => (
-            <tr key={i} className="border-t">
-              <td className="p-2">{item.name}</td>
-              <td className="p-2">{item.quantity}</td>
-              <td className="p-2">₹{item.unitPrice}</td>
-              <td className="p-2">₹{item.quantity * item.unitPrice}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+       <div className="w-full mb-4">
+    
+      <div className="hidden md:block">
+         <DataTable
+  columns={[ "Item ", "Quantity", "Price", "Subtotal (₹)"]}
+     rows={selectedItems.map((item) => [
+        
+          item.name,
+          item.quantity,
+          item.unitPrice.toFixed(2),
+         (item.quantity * item.unitPrice).toFixed(2),
+        
+        ])}
+    renderActions={(_, index) => {
+  
+    return (
+      <div className="flex gap-2">
+        <button
+         onClick={() => handleRemove(selectedItems[index].itemId)}
+          className="text-blue-600 hover:underline"
+        >
+         Remove
+        </button>
+       
+      </div>
+    );
+  }}
+/>
+      </div>
+
+      {/* Mobile Card Layout */}
+      <div className="md:hidden space-y-3">
+        {selectedItems.map((item, i) => (
+          <div key={i} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+            <div className="flex justify-between items-start mb-2">
+              <h3 className="font-medium text-gray-900 flex-1 pr-2">{item.name}</h3>
+              <span className="text-lg font-semibold text-gray-900">₹{(item.quantity * item.unitPrice).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>Qty: {item.quantity}</span>
+              <span>Price: ₹{item.unitPrice.toFixed(2)}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
 
       <div className="text-right font-semibold mb-4">
         Total: ₹

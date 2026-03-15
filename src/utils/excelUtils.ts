@@ -114,3 +114,62 @@ export const exportItemReportExcel = (items: Item[]) => {
   const filename = `Inventory_Report_${today}.xlsx`;
   XLSX.writeFile(workbook, filename);
 };
+
+export const generateSalesReportExcel = (sales: Sale[]) => {
+  // Format currency (reuse from PDF function)
+  const formatCurrency = (amount: number) =>
+    `RS: ${amount.toLocaleString("en-IN")}`;
+
+  // Table Data (reuse from PDF function)
+  const tableData = sales.map((sale, index) => {
+    const itemSummary = sale.items
+      .map((i) => `${i.name} ×${i.quantity}`)
+      .join(", ");
+
+    return [
+      index + 1,
+      new Date(sale.createdAt).toLocaleDateString("en-GB"),
+      sale.customerName,
+      itemSummary,
+      formatCurrency(sale.totalAmount),
+      sale.paymentType
+    ];
+  });
+
+  // Summary (reuse from PDF function)
+  const summary = {
+    totalOrders: sales.length,
+    totalAmount: sales.reduce((sum, s) => sum + s.totalAmount, 0),
+    cashSales: sales
+      .filter((s) => s.paymentType === "Cash")
+      .reduce((sum, s) => sum + s.totalAmount, 0),
+    creditSales: sales
+      .filter((s) => s.paymentType === "Credit")
+      .reduce((sum, s) => sum + s.totalAmount, 0),
+  };
+
+  // Prepare Excel data as Array of Arrays (AoA)
+  const data = [
+    ["Sales Report"],  // Title row
+    [],  // Empty row for spacing
+    ["#", "Date", "Customer", "Items Sold", "Total ₹", "Payment"],  // Headers
+    ...tableData,  // Table rows
+    [],  // Empty row for spacing
+    ["Summary"],  // Summary section
+    ["Total Orders", summary.totalOrders],
+    ["Total Sales", formatCurrency(summary.totalAmount)],
+    ["Cash Sales", formatCurrency(summary.cashSales)],
+    ["Credit Sales", formatCurrency(summary.creditSales)],
+  ];
+
+  // Create worksheet from data
+  const ws = XLSX.utils.aoa_to_sheet(data);
+
+  // Create workbook and append sheet
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Sales Report");
+
+  // Generate filename and save
+  const today = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(wb, `Sales_Report_${today}.xlsx`);
+};

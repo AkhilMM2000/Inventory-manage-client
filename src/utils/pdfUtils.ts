@@ -6,7 +6,7 @@ import type { Customer } from '../types/Customer';
 import type { Item } from '../types/Item';
   // adjust as per your project structure
 
-export const generateSalesReportPDF = (sales: Sale[]) => {
+export const generateSalesReportPDF=(sales: Sale[]) => {
   const doc = new jsPDF();
 
   // Title

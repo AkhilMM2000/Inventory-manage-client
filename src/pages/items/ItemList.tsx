@@ -182,6 +182,7 @@ const handleSearchChange = useCallback(
   }}
   onUpdate={async (updatedItem) => {
     try {
+      console.log(updatedItem.id!, updatedItem,'aaa')
       await updateItemById(updatedItem.id!, updatedItem);
       toast.success("Item updated successfully");
       setShowEditModal(false);

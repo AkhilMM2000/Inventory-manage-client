@@ -8,7 +8,7 @@ interface UseAuthUserResult {
   loading: boolean;
   error: string | null;
 }
-
+ 
 export const useAuthUser = (): UseAuthUserResult => {
   const [user, setUser] = useState<TokenPayload | null>(null);
   const [loading, setLoading] = useState(true);

@@ -6,7 +6,7 @@ const axiosPrivate = axios.create({
   withCredentials: true,
 });
 
-// 👉 Request Interceptor: attach token
+
 axiosPrivate.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem("accessToken");
@@ -19,7 +19,7 @@ axiosPrivate.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// 👉 Response Interceptor: handle 401 and retry once
+
 axiosPrivate.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
@@ -29,7 +29,7 @@ axiosPrivate.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        // 🔄 Call refresh endpoint
+      
         const res = await axios.post<{ accessToken: string }>(
   `${import.meta.env.VITE_API_URL}/auth/refresh-token`,
   {},

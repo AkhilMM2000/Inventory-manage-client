@@ -1,6 +1,7 @@
 import axiosPrivate from "./axiosInstance";
 import type { Sale, SaleItem } from "../types/Sales"; 
 import type { Customer } from "../types/Customer";
+import { API_ROUTES } from "../routes/apiRoutes";
 
 export interface PaginatedResult<T> {
   data: T[];
@@ -23,7 +24,7 @@ export const getSales = async (
   if (search) params.search = search;
   if (paymentType) params.paymentType = paymentType;
 
-  const response = await axiosPrivate.get("/sales", { params });
+  const response = await axiosPrivate.get(API_ROUTES.SALES.BASE, { params });
   return response.data;
 };
 
@@ -33,7 +34,7 @@ export const createSale = async (data: {
   paymentType: "Cash" | "Credit";
   items: SaleItem[];
 }): Promise<Sale> => {
-  const response = await axiosPrivate.post("/sales", data);
+  const response = await axiosPrivate.post(API_ROUTES.SALES.BASE, data);
   return response.data.sale;
 };
 
@@ -51,6 +52,7 @@ interface CustomerLedgerResponse {
 export const getCustomerLedger = async (
   customerId: string
 ): Promise<CustomerLedgerResponse> => {
-  const response = await axiosPrivate.get(`/sales/customer/${customerId}`);
+  
+    const response = await axiosPrivate.get(API_ROUTES.CUSTOMERS.LEDGER(customerId));
   return response.data;
 };

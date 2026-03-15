@@ -80,7 +80,7 @@ if (emailError || passwordError) {
     </button>
 
     {/* Link to registration */}
-    <p className="mt-4 text-center text-sm text-gray-600">
+    {/* <p className="mt-4 text-center text-sm text-gray-600">
       Not registered?{" "}
       <a
         href="/register"
@@ -88,7 +88,7 @@ if (emailError || passwordError) {
       >
         Create an account
       </a>
-    </p>
+    </p> */}
   </form>
 </div>
 

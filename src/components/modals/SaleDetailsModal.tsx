@@ -1,5 +1,6 @@
 import React from "react";
 import type { Sale } from "../../types/Sales"; 
+import DataTable from "../table/DataTable";
 
 interface SaleDetailsModalProps {
   show: boolean;
@@ -26,27 +27,19 @@ const SaleDetailsModal: React.FC<SaleDetailsModalProps> = ({ show, sale, onClose
           <p><strong>Payment:</strong> {sale.paymentType}</p>
         </div>
 
-        <table className="w-full border text-sm mb-4">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-2">Item</th>
-              <th className="p-2">Qty</th>
-              <th className="p-2">Unit Price</th>
-              <th className="p-2">Subtotal</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sale.items.map((item, idx) => (
-              <tr key={idx} className="border-t">
-                <td className="p-2">{item.name}</td>
-                <td className="p-2">{item.quantity}</td>
-                <td className="p-2">₹{item.unitPrice}</td>
-                <td className="p-2">₹{item.quantity * item.unitPrice}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
+       
+ <DataTable
+        columns={[ "Item", "Quantity", "Unit","subtotal"]}
+        rows={sale.items.map((c) => [
+         
+         c.name,
+          c.quantity,
+          c.unitPrice.toFixed(2),
+        c.quantity * c.unitPrice,
+         
+        ])}
+       
+      />
         <p className="text-right font-semibold">Total: ₹{total}</p>
 
         <div className="flex justify-end mt-4">

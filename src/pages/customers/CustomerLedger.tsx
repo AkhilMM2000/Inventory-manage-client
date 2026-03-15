@@ -2,10 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getCustomerLedger } from "../../api/Sales";
 import type { Sale } from "../../types/Sales";
-import type { Customer } from "../../types/Customer"; 
+import type { Customer } from "../../types/Customer";
 import toast from "react-hot-toast";
 import DataTable from "../../components/table/DataTable";
-import {  generateCustomerLedgerPDF } from "../../utils/pdfUtils";
+import { generateCustomerLedgerPDF } from "../../utils/pdfUtils";
 import { exportCustomerLedgerExcel } from "../../utils/excelUtils";
 
 const CustomerLedger: React.FC = () => {
@@ -18,17 +18,19 @@ const CustomerLedger: React.FC = () => {
     cashPaid: 0,
     creditOutstanding: 0,
   });
-const [showDropdown, setShowDropdown] = useState(false);
-const dropdownRef = useRef<HTMLDivElement | null>(null);
-useEffect(() => {
-  const handleClickOutside = (event: MouseEvent) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-      setShowDropdown(false);
-    }
-  };
-  document.addEventListener("mousedown", handleClickOutside);
-  return () => document.removeEventListener("mousedown", handleClickOutside);
-}, []);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   useEffect(() => {
     const fetchLedger = async () => {
       try {
@@ -48,58 +50,63 @@ useEffect(() => {
 
   if (!customer) return <div>Loading...</div>;
 
+  const formatAddress = (c: Customer) => {
+    const { line1, line2, city, district, state, postalCode, country } = c.address;
+    const parts = [line1, line2, city, district, state, postalCode, country].filter(Boolean);
+    return parts.join(", ");
+  };
+
   return (
     <div className="bg-white p-6 rounded shadow max-w-5xl mx-auto">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">📓 Customer Ledger</h2>
-        
+
         <Link to="/customers">
           <button className="text-blue-600 underline">← Back to Customers</button>
         </Link>
         <div className="relative" ref={dropdownRef}>
-  <button
-    onClick={() => setShowDropdown(!showDropdown)}
-    className="text-sm bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-  >
-    ⬇️ Download Report
-  </button>
+          <button
+            onClick={() => setShowDropdown(!showDropdown)}
+            className="text-sm bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            ⬇️ Download Report
+          </button>
 
-  {showDropdown && (
-    <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-md z-10">
-      <button
-         onClick={() => generateCustomerLedgerPDF(customer, sales, summary)}
-        className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-      >
-        📄 Download as PDF
-      </button>
-      <button
-           onClick={() => exportCustomerLedgerExcel(customer, sales, summary)}
-        className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-      >
-        📊 Download as Excel
-      </button>
-    </div>
-  )}
-</div>
-
+          {showDropdown && (
+            <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-md z-10">
+              <button
+                onClick={() => generateCustomerLedgerPDF(customer, sales, summary)}
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+              >
+                📄 Download as PDF
+              </button>
+              <button
+                onClick={() => exportCustomerLedgerExcel(customer, sales, summary)}
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+              >
+                📊 Download as Excel
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="mb-4 text-sm">
         <p><strong>Name:</strong> {customer.name}</p>
         <p><strong>Mobile:</strong> {customer.mobile}</p>
-        <p><strong>Address:</strong> {customer.address}</p>
+        <p><strong>Address:</strong> {formatAddress(customer)}</p>
       </div>
 
       <DataTable
-  columns={["#", "Date", "Items", "Total", "Payment"]}
-  rows={sales.map((c, i) => [
-    i + 1, // This is your "#" column
-    new Date(c.createdAt).toLocaleDateString("en-GB"), // Format date
-    c.items.map((item) => `${item.name} ×${item.quantity}`).join(", "),
-    `INR ${c.totalAmount.toLocaleString("en-IN")}`,
-    c.paymentType
-  ])}
-/>
+        columns={["#", "Date", "Items", "Total", "Payment"]}
+        rows={sales.map((c, i) => [
+          i + 1,
+          new Date(c.createdAt).toLocaleDateString("en-GB"),
+          c.items.map((item) => `${item.name} ×${item.quantity}`).join(", "),
+          `INR ${c.totalAmount.toLocaleString("en-IN")}`,
+          c.paymentType
+        ])}
+      />
 
       <div className="text-sm border-t pt-4 space-y-1">
         <p><strong>Total Orders:</strong> {summary.totalOrders}</p>

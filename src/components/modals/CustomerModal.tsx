@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import type { CustomerFormData } from "../../types/Customer"; 
+import type { CustomerFormData } from "../../types/Customer";
 import { validateAddress, validateMobile, validateName } from "../../utils/validators";
 import toast from "react-hot-toast";
 
@@ -18,7 +18,15 @@ const CustomerModal: React.FC<CustomerModalProps> = ({
 }) => {
   const [form, setForm] = useState<CustomerFormData>({
     name: "",
-    address: "",
+    address: {
+      line1: "",
+      line2: "",
+      city: "",
+      district: "",
+      state: "",
+      postalCode: "",
+      country: "",
+    },
     mobile: "",
   });
 
@@ -26,25 +34,52 @@ const CustomerModal: React.FC<CustomerModalProps> = ({
     if (initialData) {
       setForm(initialData);
     } else {
-      setForm({ name: "", address: "", mobile: "" });
+      setForm({
+        name: "",
+        address: {
+          line1: "",
+          line2: "",
+          city: "",
+          district: "",
+          state: "",
+          postalCode: "",
+          country: "",
+        },
+        mobile: "",
+      });
     }
   }, [initialData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
+    if (name.startsWith("address.")) {
+      const field = name.split(".")[1];
+      setForm({
+        ...form,
+        address: {
+          ...form.address,
+          [field]: value,
+        },
+      });
+      return;
+    }
+
     setForm({ ...form, [name]: value });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-      const nameError = validateName(form.name);
-  const addressError = validateAddress(form.address);
-  const mobileError = validateMobile(form.mobile);
 
-  if (nameError || addressError || mobileError) {
-    toast.error(nameError || addressError || mobileError);
-    return;
-  }
+    const nameError = validateName(form.name);
+    const addressError = validateAddress(form.address);
+    const mobileError = validateMobile(form.mobile);
+
+    if (nameError || addressError || mobileError) {
+      toast.error(nameError || addressError || mobileError);
+      return;
+    }
+
     onSubmit(form);
   };
 
@@ -72,15 +107,70 @@ const CustomerModal: React.FC<CustomerModalProps> = ({
             className="w-full border p-2 rounded"
             required
           />
+
           <input
             type="text"
-            name="address"
-            placeholder="Address"
-            value={form.address}
+            name="address.line1"
+            placeholder="Address Line 1"
+            value={form.address.line1}
             onChange={handleChange}
             className="w-full border p-2 rounded"
             required
           />
+          <input
+            type="text"
+            name="address.line2"
+            placeholder="Address Line 2 (optional)"
+            value={form.address.line2 || ""}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+          />
+          <input
+            type="text"
+            name="address.city"
+            placeholder="City"
+            value={form.address.city}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+            required
+          />
+          <input
+            type="text"
+            name="address.district"
+            placeholder="District"
+            value={form.address.district}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+            required
+          />
+          <input
+            type="text"
+            name="address.state"
+            placeholder="State"
+            value={form.address.state}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+            required
+          />
+          <input
+            type="text"
+            name="address.postalCode"
+            placeholder="Postal Code"
+            value={form.address.postalCode}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+            required
+          />
+          <input
+            type="text"
+            name="address.country"
+            placeholder="Country"
+            value={form.address.country}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+            required
+          />
+
           <input
             type="text"
             name="mobile"
