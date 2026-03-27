@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# AI / Editor specific
+.agents
+.augment
+.claude
+skills-lock.json

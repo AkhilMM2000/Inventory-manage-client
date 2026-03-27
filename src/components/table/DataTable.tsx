@@ -1,56 +1,83 @@
 import React from "react";
 
+interface ColumnConfig {
+  header: string;
+  className?: string;
+}
+
 interface DataTableProps {
-  columns: string[];
-  rows: (string | number | React.ReactNode)[][];
-  renderActions?: (row: (string | number | React.ReactNode)[], rowIndex: number) => React.ReactNode;
+  columns: (string | ColumnConfig)[];
+  rows: (React.ReactNode)[][];
+  renderActions?: (row: React.ReactNode[], rowIndex: number) => React.ReactNode;
 }
 
 const DataTable: React.FC<DataTableProps> = ({ columns, rows, renderActions }) => {
- 
-
   return (
-    <div className="w-full bg-white shadow rounded-md overflow-x-auto">
-      {/* Header */}
-      <div className="flex w-full bg-gray-100 font-semibold text-sm border-b">
-        {columns.map((col, index) => (
-          <div
-            key={index}
-            className="flex-1 px-4 py-3 min-w-[120px] truncate"
-          >
-            {col}
-          </div>
-        ))}
-        {renderActions && (
-          <div className="w-[120px] px-4 py-3 truncate">Action</div>
-        )}
-      </div>
-
-      {/* Rows */}
-      {rows.length === 0 ? (
-        <div className="p-4 text-center text-gray-500">No data available</div>
-      ) : (
-        rows.map((row, rowIndex) => (
-          <div key={rowIndex} className="flex w-full text-sm border-b hover:bg-gray-50">
-            {row.map((cell, cellIndex) => (
-              <div
-                key={cellIndex}
-                className="flex-1 px-4 py-3 min-w-[120px] truncate"
-              >
-                {cell}
-              </div>
-            ))}
+    <div className="w-full overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+      <table className="w-full text-left border-collapse">
+        <thead>
+          <tr className="bg-slate-50/50 border-b border-slate-200">
+            {columns.map((col, index) => {
+              const header = typeof col === "string" ? col : col.header;
+              const className = typeof col === "string" ? "" : col.className;
+              return (
+                <th
+                  key={index}
+                  className={`px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 whitespace-nowrap ${className}`}
+                >
+                  {header}
+                </th>
+              );
+            })}
             {renderActions && (
-              <div className="w-[120px] px-4 py-3">
-                {renderActions(row, rowIndex)}
-              </div>
+              <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right">
+                Actions
+              </th>
             )}
-          </div>
-        ))
-      )}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100">
+          {rows.length === 0 ? (
+            <tr>
+              <td
+                colSpan={columns.length + (renderActions ? 1 : 0)}
+                className="px-6 py-12 text-center text-slate-500 italic"
+              >
+                No data available
+              </td>
+            </tr>
+          ) : (
+            rows.map((row, rowIndex) => (
+              <tr
+                key={rowIndex}
+                className="hover:bg-slate-50/80 transition-colors duration-150 group"
+              >
+                {row.map((cell, cellIndex) => {
+                  const className = typeof columns[cellIndex] === "object" ? (columns[cellIndex] as ColumnConfig).className : "";
+                  return (
+                    <td
+                      key={cellIndex}
+                      className={`px-6 py-4 text-sm text-slate-600 align-top ${className}`}
+                    >
+                      {cell}
+                    </td>
+                  );
+                })}
+                {renderActions && (
+                  <td className="px-6 py-4 text-sm text-right align-top">
+                    <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      {renderActions(row, rowIndex)}
+                    </div>
+                  </td>
+                )}
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   );
 };
 
-
 export default DataTable;
+

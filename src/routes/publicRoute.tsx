@@ -1,15 +1,18 @@
-import type { JSX } from "react";
 import { Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
-const PublicRoute = ({ children }: { children: JSX.Element }) => {
-  const token = localStorage.getItem("accessToken");
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
 
-  if (token) {
+  if (loading) return null; // Or a loading spinner
+
+  if (user) {
     // 🚫 Already logged in, block access to /login or /register
     return <Navigate to="/items" replace />;
   }
 
-  return children;
+  return <>{children}</>;
 };
 
 export default PublicRoute;
+

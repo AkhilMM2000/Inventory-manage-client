@@ -1,24 +1,32 @@
 import axios, { AxiosError } from "axios";
 import type { InternalAxiosRequestConfig } from "axios";
 
+let accessToken: string | null = null;
+let tokenListener: ((token: string | null) => void) | null = null;
+
+export const setAccessToken = (token: string | null) => {
+  accessToken = token;
+  if (tokenListener) tokenListener(token);
+};
+
+export const setTokenListener = (listener: (token: string | null) => void) => {
+  tokenListener = listener;
+};
+
 const axiosPrivate = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true,
 });
 
-
 axiosPrivate.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = localStorage.getItem("accessToken");
-   
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
     }
     return config;
   },
   (error) => Promise.reject(error)
 );
-
 
 axiosPrivate.interceptors.response.use(
   (response) => response,
@@ -29,25 +37,19 @@ axiosPrivate.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-      
         const res = await axios.post<{ accessToken: string }>(
-  `${import.meta.env.VITE_API_URL}/auth/refresh-token`,
-  {},
-  { withCredentials: true }
-);
-
+          `${import.meta.env.VITE_API_URL}/auth/refresh-token`,
+          {},
+          { withCredentials: true }
+        );
 
         const newAccessToken = res.data.accessToken;
-
-       
-        localStorage.setItem("accessToken", newAccessToken);
+        setAccessToken(newAccessToken); // Updates both the variable and the listener
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
-        return axiosPrivate(originalRequest); // retry original request
+        return axiosPrivate(originalRequest);
       } catch (refreshError) {
-        console.error("🔁 Refresh token failed:", refreshError);
-        localStorage.removeItem("accessToken");
-        window.location.href ='/login'
+        setAccessToken(null);
         return Promise.reject(refreshError);
       }
     }
@@ -55,5 +57,7 @@ axiosPrivate.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+
 
 export default axiosPrivate;

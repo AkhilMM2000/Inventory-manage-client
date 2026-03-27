@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../../api/auth";
+import { useAuth } from "../../context/AuthContext";
 import InputField from "../../components/forms/InputField";
 import toast from "react-hot-toast";
-import axios from "axios";
 import { validateEmail, validatePassword } from "../../utils/validators";
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -18,30 +18,24 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-const emailError = validateEmail(form.email);
-const passwordError = validatePassword(form.password);
-if (emailError || passwordError) {
-  toast.error(emailError || passwordError);
-  return;
-}
-    setLoading(true);
-    try {
-      const { accessToken } = await loginUser(form);
-      localStorage.setItem("accessToken", accessToken);
-      toast.success("Logged in successfully");
-      navigate("/items",{replace:true}); 
-    }  catch (error: unknown) {
-    let msg = "Something went wrong";
-    
-    if (axios.isAxiosError(error) && error.response) {
-      msg = error.response.data?.error || msg;
+    const emailError = validateEmail(form.email);
+    const passwordError = validatePassword(form.password);
+    if (emailError || passwordError) {
+      toast.error(emailError || passwordError);
+      return;
     }
 
-    toast.error(`❌ ${msg}`);
-  } finally {
-    setLoading(false);
-  }
+    setIsSubmitting(true);
+    try {
+      await login(form);
+      navigate("/items", { replace: true });
+    } catch {
+      // Error handled in login context
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 px-4"
@@ -73,10 +67,10 @@ if (emailError || passwordError) {
 
     <button
       type="submit"
-      disabled={loading}
+      disabled={isSubmitting}
       className="w-full mt-4 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
     >
-      {loading ? "Logging in..." : "Login"}
+      {isSubmitting ? "Logging in..." : "Login"}
     </button>
 
     {/* Link to registration */}
