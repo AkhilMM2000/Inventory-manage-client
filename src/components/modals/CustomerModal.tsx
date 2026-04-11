@@ -80,7 +80,39 @@ const CustomerModal: React.FC<CustomerModalProps> = ({
       return;
     }
 
-    onSubmit(form);
+    if (initialData) {
+      // Logic for partial update: send only changed fields
+      const dirtyFields: any = {};
+      
+      if (form.name !== (initialData as any).name) dirtyFields.name = form.name;
+      if (form.mobile !== (initialData as any).mobile) dirtyFields.mobile = form.mobile;
+      
+      // Address diffing
+      const addressDiff: any = {};
+      let addressChanged = false;
+      
+      Object.keys(form.address).forEach((key) => {
+        const k = key as keyof typeof form.address;
+        if (form.address[k] !== (initialData as any).address[k]) {
+          addressDiff[k] = form.address[k];
+          addressChanged = true;
+        }
+      });
+      
+      if (addressChanged) {
+        dirtyFields.address = addressDiff;
+      }
+
+      if (Object.keys(dirtyFields).length === 0) {
+        toast.error("No changes detected");
+        return;
+      }
+      
+      onSubmit(dirtyFields);
+    } else {
+      // New customer: send everything
+      onSubmit(form);
+    }
   };
 
   if (!show) return null;

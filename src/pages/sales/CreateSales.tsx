@@ -213,7 +213,8 @@ console.log(selectedItems)
 
             <button
               onClick={handleAddItem}
-              className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-all font-semibold shadow-sm flex items-center justify-center gap-2 active:scale-95"
+              disabled={quantity <= 0 || !itemId}
+              className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-all font-semibold shadow-sm flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
             >
               <span>+</span> Add to Cart
             </button>

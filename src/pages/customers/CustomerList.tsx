@@ -1,101 +1,40 @@
-import { useEffect, useState, useCallback } from "react";
-import debounce from "lodash/debounce";
-import { getCustomers, deleteCustomer, updateCustomer, addCustomer } from "../../api/customer";
-import type { Customer, CustomerFormData } from "../../types/Customer";
+import { Link } from "react-router-dom";
+import { BookOpen, Pencil, Trash2 } from "lucide-react";
 import DataTable from "../../components/table/DataTable";
 import Pagination from "../../components/ui/pagination";
 import DeleteModal from "../../components/ui/DeleteModal";
-import toast from "react-hot-toast";
-import axios from "axios";
 import CustomerModal from "../../components/modals/CustomerModal";
-import { Link } from "react-router-dom";
-import { BookOpen, Pencil, Trash2 } from "lucide-react";
+import { TableSkeleton } from "../../components/ui/Skeleton";
+import { useCustomers } from "../../hooks/useCustomers";
+import type { Customer } from "../../types/Customer";
 
 const CustomerList = () => {
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [page, setPage] = useState(1);
-  const [limit] = useState(5);
-  const [total, setTotal] = useState(0);
-  const [search, setSearch] = useState("");
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  const [showCustomerModal, setShowCustomerModal] = useState(false);
-  const [editCustomerData, setEditCustomerData] = useState<Customer | null>(null);
-
-  const fetchCustomers = async () => {
-    try {
-      const result = await getCustomers(page, limit, search);
-      setCustomers(result.data);
-      setTotal(result.total);
-    } catch (error: unknown) {
-      let msg = "Something went wrong";
-
-      if (axios.isAxiosError(error) && error.response) {
-        msg = error.response.data?.error || msg;
-      }
-
-      toast.error(`❌ ${msg}`);
-    }
-  };
-
-  useEffect(() => {
-    fetchCustomers();
-  }, [page, search]);
-
-  const handleSearch = useCallback(
-    debounce((value: string) => {
-      setSearch(value);
-      setPage(1);
-    }, 500),
-    []
-  );
-
-  const handleDeleteClick = (index: number) => {
-    setSelectedCustomer(customers[index]);
-    setShowDeleteModal(true);
-  };
-
-  const handleEditClick = (index: number) => {
-    const customer = customers[index];
-    setEditCustomerData(customer);
-    setShowCustomerModal(true);
-  };
-
-  const handleAddCustomer = () => {
-    setEditCustomerData(null);
-    setShowCustomerModal(true);
-  };
-
-  const handleCustomerSubmit = async (form: CustomerFormData) => {
-    try {
-      if (editCustomerData) {
-        await updateCustomer(editCustomerData.id, form);
-        toast.success("Customer updated");
-      } else {
-        await addCustomer(form);
-        toast.success("Customer added");
-      }
-
-      setShowCustomerModal(false);
-      setEditCustomerData(null);
-      fetchCustomers();
-    } catch {
-      toast.error("Failed to save customer");
-    }
-  };
+  const {
+    customers,
+    page,
+    setPage,
+    limit,
+    total,
+    loading,
+    handleSearch,
+    showDeleteModal,
+    setShowDeleteModal,
+    selectedCustomer,
+    showCustomerModal,
+    setShowCustomerModal,
+    editCustomerData,
+    handleDeleteClick,
+    handleEditClick,
+    handleAddCustomer,
+    onCustomerSubmit,
+    onDeleteConfirm,
+  } = useCustomers();
 
   const formatAddress = (c: Customer) => {
     const { line1, line2, city, district, state, postalCode, country } = c.address;
-    const parts = [
-      line1,
-      line2,
-      city,
-      district,
-      state,
-      postalCode,
-      country,
-    ].filter(Boolean);
-    return parts.join(", ");
+    return [line1, line2, city, district, state, postalCode, country]
+      .filter(Boolean)
+      .join(", ");
   };
 
   return (
@@ -131,93 +70,85 @@ const CustomerList = () => {
           </div>
         </div>
 
-        <DataTable
-          columns={[
-            { header: "#", className: "w-16" },
-            { header: "Customer Name", className: "font-medium text-slate-900" },
-            { header: "Address", className: "max-w-md" },
-            { header: "Mobile", className: "w-40" }
-          ]}
-          rows={customers.map((c, i) => [
-            (page - 1) * limit + i + 1,
-            <div className="flex flex-col">
-              <span className="font-semibold text-slate-800">{c.name}</span>
-              <span className="text-xs text-slate-400">ID: {c.id.slice(0, 8)}...</span>
-            </div>,
-            <div className="leading-relaxed text-slate-500 text-sm">
-              {formatAddress(c)}
-            </div>,
-            <span className="font-mono text-slate-600 bg-slate-50 px-2 py-1 rounded text-xs">{c.mobile}</span>,
-          ])}
-          renderActions={(_, index) => {
-            const customer = customers[index];
-            return (
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => handleEditClick(index)}
-                  className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                  title="Edit Customer"
-                >
-                  <Pencil size={18} />
-                </button>
-                <Link 
-                  to={`/customers/${customer.id}/ledger`} 
-                  className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
-                  title="View Ledger"
-                >
-                  <BookOpen size={18} />
-                </Link>
-                <button
-                  onClick={() => handleDeleteClick(index)}
-                  className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                  title="Delete Customer"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            );
-          }}
-        />
+        {loading ? (
+          <TableSkeleton cols={4} rows={limit} />
+        ) : (
+          <>
+            <DataTable
+              columns={[
+                { header: "#", className: "w-16" },
+                { header: "Customer Name", className: "font-medium text-slate-900" },
+                { header: "Address", className: "max-w-md" },
+                { header: "Mobile", className: "w-40" }
+              ]}
+              rows={customers.map((c, i) => [
+                (page - 1) * limit + i + 1,
+                <div className="flex flex-col">
+                  <span className="font-semibold text-slate-800">{c.name}</span>
+                  <span className="text-xs text-slate-400">ID: {c.id.slice(0, 8)}...</span>
+                </div>,
+                <div className="leading-relaxed text-slate-500 text-sm">
+                  {formatAddress(c)}
+                </div>,
+                <span className="font-mono text-slate-600 bg-slate-50 px-2 py-1 rounded text-xs">{c.mobile}</span>,
+              ])}
+              renderActions={(_, index) => {
+                const customer = customers[index];
+                return (
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => handleEditClick(index)}
+                      className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                      title="Edit Customer"
+                    >
+                      <Pencil size={18} />
+                    </button>
+                    <Link 
+                      to={`/customers/${customer.id}/ledger`} 
+                      className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
+                      title="View Ledger"
+                    >
+                      <BookOpen size={18} />
+                    </Link>
+                    <button
+                      onClick={() => handleDeleteClick(index)}
+                      className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                      title="Delete Customer"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                );
+              }}
+            />
 
-        <div className="mt-8 border-t border-slate-50 pt-6">
-          <Pagination
-            page={page}
-            limit={limit}
-            total={total}
-            onPageChange={setPage}
-          />
-        </div>
+            <div className="mt-8 border-t border-slate-50 pt-6">
+              <Pagination
+                page={page}
+                limit={limit}
+                total={total}
+                onPageChange={setPage}
+              />
+            </div>
+          </>
+        )}
       </div>
 
       <CustomerModal
         show={showCustomerModal}
-        onClose={() => {
-          setShowCustomerModal(false);
-          setEditCustomerData(null);
-        }}
-        onSubmit={handleCustomerSubmit}
-        initialData={editCustomerData}
+        onClose={() => setShowCustomerModal(false)}
+        onSubmit={onCustomerSubmit}
+        initialData={editCustomerData || undefined}
       />
 
       <DeleteModal
         show={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
-        onConfirm={async () => {
-          if (!selectedCustomer) return;
-          try {
-            await deleteCustomer(selectedCustomer.id);
-            toast.success("Customer deleted");
-            setShowDeleteModal(false);
-            fetchCustomers();
-          } catch {
-            toast.error("Failed to delete customer");
-          }
-        }}
+        onConfirm={onDeleteConfirm}
         message={`Are you sure you want to delete "${selectedCustomer?.name}"? This action cannot be undone.`}
       />
     </div>
   );
-
 };
 
 export default CustomerList;
