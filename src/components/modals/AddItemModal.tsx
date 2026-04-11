@@ -34,18 +34,27 @@ const AddItemModal: React.FC<AddItemModalProps> = ({ isOpen, onClose, onSuccess 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const descError = validateDescription(form.description);
+    // Trim strings before validation and submission
+    const trimmedName = form.name.trim();
+    const trimmedDesc = form.description.trim();
+
+    const descError = validateDescription(trimmedDesc);
     const qtyError = validateQuantity(form.quantity);
     const priceError = validatePrice(form.price);
-const nameError=validateName(form.name)
-    if (nameError||descError || qtyError || priceError) {
-      toast.error(nameError||descError || qtyError || priceError);
+    const nameError = validateName(trimmedName);
+
+    if (nameError || descError || qtyError || priceError) {
+      toast.error(nameError || descError || qtyError || priceError);
       return;
     }
 
     try {
       setLoading(true);
-      await addItem(form);
+      await addItem({ 
+        ...form, 
+        name: trimmedName, 
+        description: trimmedDesc 
+      });
       toast.success("✅ Item added!");
       setForm({ name: "", description: "", quantity: 0, price: 0 });
       onClose();

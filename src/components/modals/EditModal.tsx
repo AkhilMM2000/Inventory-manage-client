@@ -46,20 +46,29 @@ const EditItemModal: React.FC<EditItemModalProps> = ({
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-
     e.preventDefault();
-    const nameError = validateName(form.name);
-const descError = validateDescription(form.description);
-const qtyError = validateQuantity(form.quantity);
-const priceError = validatePrice(form.price);
 
-if (nameError || descError || qtyError || priceError) {
-  toast.error(nameError || descError || qtyError || priceError); 
-  return;
-}
+    // Trim strings before validation and submission
+    const trimmedName = form.name.trim();
+    const trimmedDesc = form.description.trim();
+
+    const nameError = validateName(trimmedName);
+    const descError = validateDescription(trimmedDesc);
+    const qtyError = validateQuantity(form.quantity);
+    const priceError = validatePrice(form.price);
+
+    if (nameError || descError || qtyError || priceError) {
+      toast.error(nameError || descError || qtyError || priceError);
+      return;
+    }
 
     if (item) {
-      onUpdate({ ...form, id: item.id });
+      onUpdate({ 
+        ...form, 
+        name: trimmedName, 
+        description: trimmedDesc, 
+        id: item.id 
+      });
     }
   };
 
