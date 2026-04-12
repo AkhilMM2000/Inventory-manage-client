@@ -36,7 +36,7 @@ export const validateQuantity = (qty: number): string | null => {
 };
 
 export const validatePrice = (price: number): string | null => {
-  if (price === undefined||price<0) return "Price must be positive integer.";
+  if (price === undefined || price <= 0) return "Price must be greater than 0.";
   return null;
 };
 

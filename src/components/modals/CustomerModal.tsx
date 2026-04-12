@@ -71,9 +71,25 @@ const CustomerModal: React.FC<CustomerModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const nameError = validateName(form.name);
-    const addressError = validateAddress(form.address);
-    const mobileError = validateMobile(form.mobile);
+    // Prepare trimmed data
+    const trimmedForm: CustomerFormData = {
+      ...form,
+      name: form.name.trim(),
+      mobile: form.mobile.trim(),
+      address: {
+        line1: form.address.line1.trim(),
+        line2: form.address.line2?.trim() || "",
+        city: form.address.city.trim(),
+        district: form.address.district.trim(),
+        state: form.address.state.trim(),
+        postalCode: form.address.postalCode.trim(),
+        country: form.address.country.trim(),
+      },
+    };
+
+    const nameError = validateName(trimmedForm.name);
+    const addressError = validateAddress(trimmedForm.address);
+    const mobileError = validateMobile(trimmedForm.mobile);
 
     if (nameError || addressError || mobileError) {
       toast.error(nameError || addressError || mobileError);
@@ -84,17 +100,17 @@ const CustomerModal: React.FC<CustomerModalProps> = ({
       // Logic for partial update: send only changed fields
       const dirtyFields: any = {};
       
-      if (form.name !== (initialData as any).name) dirtyFields.name = form.name;
-      if (form.mobile !== (initialData as any).mobile) dirtyFields.mobile = form.mobile;
+      if (trimmedForm.name !== (initialData as any).name) dirtyFields.name = trimmedForm.name;
+      if (trimmedForm.mobile !== (initialData as any).mobile) dirtyFields.mobile = trimmedForm.mobile;
       
       // Address diffing
       const addressDiff: any = {};
       let addressChanged = false;
       
-      Object.keys(form.address).forEach((key) => {
-        const k = key as keyof typeof form.address;
-        if (form.address[k] !== (initialData as any).address[k]) {
-          addressDiff[k] = form.address[k];
+      Object.keys(trimmedForm.address).forEach((key) => {
+        const k = key as keyof typeof trimmedForm.address;
+        if (trimmedForm.address[k] !== (initialData as any).address[k]) {
+          addressDiff[k] = trimmedForm.address[k];
           addressChanged = true;
         }
       });
@@ -111,7 +127,7 @@ const CustomerModal: React.FC<CustomerModalProps> = ({
       onSubmit(dirtyFields);
     } else {
       // New customer: send everything
-      onSubmit(form);
+      onSubmit(trimmedForm);
     }
   };
 
