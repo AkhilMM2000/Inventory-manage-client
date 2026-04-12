@@ -77,7 +77,7 @@ export const useSales = () => {
       setIsDownloading(true);
       const allSales = await fetchAllSalesForReport();
       generateSalesReportPDF(allSales);
-    } catch (error: unknown) {
+    } catch {
       toast.error("Failed to download PDF report");
     } finally {
       setIsDownloading(false);
@@ -89,7 +89,7 @@ export const useSales = () => {
       setIsDownloadingExcel(true);
       const allSales = await fetchAllSalesForReport();
       generateSalesReportExcel(allSales);
-    } catch (error: unknown) {
+    } catch {
       toast.error("Failed to download Excel report");
     } finally {
       setIsDownloadingExcel(false);
