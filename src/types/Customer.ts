@@ -15,6 +15,7 @@ export interface Customer {
   mobile: string;
   createdAt: string;
   updatedAt: string;
+  salesCount?: number;
 }
 
 export interface CustomerFormData {

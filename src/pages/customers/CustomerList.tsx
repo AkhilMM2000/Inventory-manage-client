@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { BookOpen, Pencil, Trash2 } from "lucide-react";
 import DataTable from "../../components/table/DataTable";
 import Pagination from "../../components/ui/pagination";
@@ -9,6 +10,15 @@ import { useCustomers } from "../../hooks/useCustomers";
 import type { Customer } from "../../types/Customer";
 
 const CustomerList = () => {
+  const navigate = useNavigate();
+
+  const handleLedgerClick = (customer: Customer) => {
+    if (customer.salesCount && customer.salesCount > 0) {
+      navigate(`/customers/${customer.id}/ledger`);
+    } else {
+      toast.error("Don't have any sales for this customer so far.");
+    }
+  };
   const {
     customers,
     page,
@@ -103,13 +113,13 @@ const CustomerList = () => {
                     >
                       <Pencil size={18} />
                     </button>
-                    <Link 
-                      to={`/customers/${customer.id}/ledger`} 
+                    <button
+                      onClick={() => handleLedgerClick(customer)}
                       className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-all"
                       title="View Ledger"
                     >
                       <BookOpen size={18} />
-                    </Link>
+                    </button>
                     <button
                       onClick={() => handleDeleteClick(index)}
                       className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
