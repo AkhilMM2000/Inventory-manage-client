@@ -8,15 +8,28 @@ import CustomerModal from "../../components/modals/CustomerModal";
 import { TableSkeleton } from "../../components/ui/Skeleton";
 import { useCustomers } from "../../hooks/useCustomers";
 import type { Customer } from "../../types/Customer";
+import { getCustomerLedger } from "../../api/Sales";
 
 const CustomerList = () => {
   const navigate = useNavigate();
 
-  const handleLedgerClick = (customer: Customer) => {
-    if (customer.salesCount && customer.salesCount > 0) {
-      navigate(`/customers/${customer.id}/ledger`);
-    } else {
-      toast.error("Don't have any sales for this customer so far.");
+  const handleLedgerClick = async (customer: Customer) => {
+    try {
+      // Create a loading toast while we check
+      const loadingToastId = toast.loading("Checking ledger...");
+      
+      const data = await getCustomerLedger(customer.id);
+      
+      toast.dismiss(loadingToastId);
+
+      if (data.sales && data.sales.length > 0) {
+        navigate(`/customers/${customer.id}/ledger`);
+      } else {
+        toast.error("Don't have any sales for this customer so far.");
+      }
+    } catch (e) {
+      toast.dismiss();
+      toast.error("Failed to verify customer ledger.");
     }
   };
   const {
