@@ -31,24 +31,26 @@ const CustomerModal: React.FC<CustomerModalProps> = ({
   });
 
   useEffect(() => {
-    if (initialData) {
-      setForm(initialData);
-    } else {
-      setForm({
-        name: "",
-        address: {
-          line1: "",
-          line2: "",
-          city: "",
-          district: "",
-          state: "",
-          postalCode: "",
-          country: "",
-        },
-        mobile: "",
-      });
+    if (show) {
+      if (initialData) {
+        setForm(initialData);
+      } else {
+        setForm({
+          name: "",
+          address: {
+            line1: "",
+            line2: "",
+            city: "",
+            district: "",
+            state: "",
+            postalCode: "",
+            country: "",
+          },
+          mobile: "",
+        });
+      }
     }
-  }, [initialData]);
+  }, [initialData, show]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
