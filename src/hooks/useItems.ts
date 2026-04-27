@@ -4,6 +4,8 @@ import toast from 'react-hot-toast';
 import debounce from 'lodash/debounce';
 import { getItems, deleteItemById, updateItemById } from '../api/item';
 import type { Item } from '../types/Item';
+import { generateItemReportPDF } from '../utils/pdfUtils';
+import { exportItemReportExcel } from '../utils/excelUtils';
 
 export const useItems = () => {
   const [items, setItems] = useState<Item[]>([]);
@@ -100,6 +102,34 @@ export const useItems = () => {
     }
   };
 
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportPDF = async () => {
+    try {
+      setIsExporting(true);
+      const result = await getItems(1, 10000, search);
+      generateItemReportPDF(result.data);
+      toast.success("PDF exported successfully");
+    } catch (error) {
+      toast.error("Failed to export PDF");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    try {
+      setIsExporting(true);
+      const result = await getItems(1, 10000, search);
+      exportItemReportExcel(result.data);
+      toast.success("Excel exported successfully");
+    } catch (error) {
+      toast.error("Failed to export Excel");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return {
     items,
     page,
@@ -121,6 +151,10 @@ export const useItems = () => {
     showExportDropdown,
     setShowExportDropdown,
     dropdownRef,
+    // Export state
+    isExporting,
+    handleExportPDF,
+    handleExportExcel,
     // Actions
     handleEdit,
     handleDelete,
