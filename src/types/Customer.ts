@@ -23,3 +23,4 @@ export interface CustomerFormData {
   address: Address;
   mobile: string;
 }
+console.log("validator")
