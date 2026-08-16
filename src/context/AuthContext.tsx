@@ -19,7 +19,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<TokenPayload | null>(null);
   const [accessToken, setAccessTokenState] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-
+console.log(accessToken)
   // Sync state when the axios interceptor refreshes the token in the background
   useEffect(() => {
     setTokenListener((token) => {
